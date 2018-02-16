@@ -1,0 +1,320 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <conio.h>
+#include <string.h>
+
+int tiles[4][4];
+int undotile[4][4];
+int column, row;
+char direction;
+int randrow, randcolumn,randrow2, randcolumn2;
+int score=0;
+int max=0;
+int check;
+
+void start_tiles()
+{
+    for(row=0; row<4; row++)
+        for(column=0; column<4; column++)
+        {
+            tiles[row][column]='-';
+        }
+
+    do
+    {
+        randrow = rand()%4;
+        randcolumn = rand()%4;
+        randrow2 = rand()%4;
+        randcolumn2 = rand()%4;
+    }while(randrow==randrow2 && randcolumn==randcolumn2);
+
+    tiles[randrow][randcolumn]=2;
+    tiles[randrow2][randcolumn2]=2;
+}
+
+void print__tiles()
+{
+    //Diziyi yazdirma.
+    maxtile();
+    system("cls");
+    printf("\n  ::::__THE_2048_PUZZLE__::::\t\t\t\t\tDeveloped by Hasan Furkan AKKIZ\n\n");
+    printf("\t\t  Max Value=%d\t\t\t\t\tSCORE = %d\n\n\n",max,score);
+
+    for(row=0; row<4; row++)
+    {
+        printf("\t\t\t");
+        for(column=0; column<4; column++)
+        {
+            if(tiles[row][column]!=0 && tiles[row][column]!='-')
+                printf("\t%d",tiles[row][column]);
+            else
+                printf("\t%c",'-');
+        }
+        printf("\n\n");
+    }
+    printf("\t    W\t\t\t\t\t\t\t'R' or 'r'-->Restart\t'Q' or 'q'-->Quit\n\t    ^\n\tA <   > D\t\t\t\t\t\t'U' or 'u'-->Undo\n\t    v\n\t    S\n\n\n");
+}
+void rand_tiles_2()
+{
+    //Random sutun ve satýr bulma.
+
+    srand(time(NULL));
+    int two_or_4;
+    two_or_4=rand()%10;
+
+    do
+    {
+        randrow = rand()%4;
+        randcolumn = rand()%4;
+    }while(tiles[randrow][randcolumn] != '-');
+
+    if(two_or_4>7)
+        tiles[randrow][randcolumn] = 4;
+    else
+        tiles[randrow][randcolumn] = 2;
+}
+void control(direction)
+{
+    int count;
+
+    switch(direction)
+        {
+            case 'W':
+            case 'w':
+                for(column=0; column<4 ;column++)
+                {
+                    count=0;
+                    for(row=0; row<4 ;row++)
+                        if(tiles[row][column]!='-')
+                        {
+                            if(count!=0)
+                            {
+                                tiles[row-count][column]=tiles[row][column];
+                                tiles[row][column]='-';
+                            }
+                        }
+                        else
+                            count++;
+                }
+                break;
+
+            case 'S':
+            case 's':
+                for(column=0; column<4 ;column++)
+                {
+                    count=0;
+                    for(row=3; row>=0; row--)
+                        if(tiles[row][column]!='-')
+                        {
+                            if(count!=0)
+                            {
+                                tiles[row+count][column]=tiles[row][column];
+                                tiles[row][column]='-';
+                            }
+                        }
+                        else
+                            count++;
+                }
+                break;
+
+            case 'A':
+            case 'a':
+                for(row=0; row<4 ;row++)
+                {
+                    count=0;
+                    for(column=0; column<4 ;column++)
+                        if(tiles[row][column]!='-')
+                        {
+                            if(count!=0)
+                            {
+                                tiles[row][column-count]=tiles[row][column];
+                                tiles[row][column]='-';
+                            }
+                        }
+                        else
+                            count++;
+                }
+                break;
+            case 'D':
+            case 'd':
+                for(row=0; row<4; row++)
+                {
+                    count=0;
+                    for(column=3; column>=0 ;column--)
+                        if(tiles[row][column]!='-')
+                        {
+                            if(count!=0)
+                            {
+                                tiles[row][column+count]=tiles[row][column];
+                                tiles[row][column]='-';
+                            }
+                        }
+                        else
+                            count++;
+                }
+            break;
+        }
+}
+void update_tiles(direction)
+{
+    switch(direction)
+        {
+            case 'W':
+            case 'w':
+                for(column=0; column<4 ;column++)
+                    for(row=0; row<3 ;row++)
+                        if(tiles[row][column]!='-' && tiles[row][column]==tiles[row+1][column])
+                        {
+                            tiles[row][column]+=tiles[row+1][column];
+                            score+=tiles[row+1][column];
+                            tiles[row+1][column]='-';
+
+                        }
+            break;
+
+            case 'S':
+            case 's':
+                for(column=0; column<4 ;column++)
+                    for(row=3; row>0; row--)
+                        if(tiles[row][column]!='-' && tiles[row][column]==tiles[row-1][column])
+                        {
+                            tiles[row][column]+=tiles[row-1][column];
+                            score+=tiles[row-1][column];
+                            tiles[row-1][column]='-';
+                        }
+            break;
+
+            case 'A':
+            case 'a':
+                for(row=0; row<4 ;row++)
+                    for(column=0; column<3 ;column++)
+                        if(tiles[row][column]!='-' && tiles[row][column]==tiles[row][column+1])
+                        {
+                            tiles[row][column]+=tiles[row][column+1];
+                            score+=tiles[row][column+1];
+                            tiles[row][column+1]='-';
+                        }
+            break;
+
+            case 'D':
+            case 'd':
+                for(row=0; row<4; row++)
+                    for(column=3; column>0 ;column--)
+                        if(tiles[row][column]!='-' && tiles[row][column]==tiles[row][column-1])
+                        {
+                            tiles[row][column]+=tiles[row][column-1];
+                            score+=tiles[row][column-1];
+                            tiles[row][column-1]='-';
+
+                        }
+            break;
+        }
+}
+
+void maxtile()
+{
+    for(row=0; row<4; row++)
+    {
+        for(column=0; column<4; column++)
+        {
+            if(tiles[row][column]!='-')
+                if(tiles[row][column]>max)
+                    max=tiles[row][column];
+        }
+    }
+}
+
+void game_over_check()
+{
+    for(row=0; row<4; row++)
+    {
+        for(column=0; column<4; column++)
+        {
+            if(tiles[row][column]=='-')
+            {
+                check=0;
+                break;
+            }
+        }
+    }
+}
+void undotiles()
+{
+    for(row=0; row<4; row++)
+        for(column=0; column<4; column++)
+            undotile[row][column]=tiles[row][column];
+
+}
+
+int main()
+{
+    char yes_or_no;
+    start_tiles();
+    print__tiles();
+
+    while(1)
+    {
+        printf("\nPlease enter a direction:");
+        scanf("%s",&direction);
+        if(direction=='w'||direction=='a'||direction=='s'||direction=='d'||direction=='W'||direction=='A'||direction=='S'||direction=='D')
+        {
+            undotiles();
+            control(direction);
+            update_tiles(direction);
+            control(direction);
+            rand_tiles_2();
+            print__tiles();
+
+        }
+        else if(direction=='u'||direction=='U')
+        {
+            for(row=0; row<4; row++)
+                for(column=0; column<4; column++)
+                    tiles[row][column]=undotile[row][column];
+            print__tiles();
+        }
+        else if(direction=='r'||direction=='R')
+            {
+                start_tiles();
+                score=0;
+                max=2;
+                print__tiles();
+            }
+        else if(direction=='q'||direction=='Q')
+        {
+            system("cls");
+            printf("\n\n\n\n\n\n\t\t\t\t\t****THANKS FOR PLAYING****\n\n\t\t\t\t\t   ____SEE YOU LATER____\n\n\n\n\n\n\n\n\n");
+            exit(0);
+        }
+        else
+        {
+            printf("\nPLEASE ENTER A REAL DIRECTION!!!\n");
+        }
+        game_over_check();
+        if(check==1)
+        {
+            printf("\n\n\n\t\t\t\t   ******GAME OVER******\n\n\t\t\t   Developed by Hasan Furkan AKKIZ!!!!!!\n\n\t\t         :: Would you like to try again (y/n) ? :: ");
+            do{
+                scanf("%s",&yes_or_no);
+                if(yes_or_no=='n')
+                    exit(0);
+                else if(yes_or_no=='y')
+                {
+                    start_tiles();
+                    print__tiles();
+                }
+                else
+                {
+                    printf("\nPlease enter just 'y' or 'n'!!!!!");
+                    printf("\n\n\t\t         :: Would you like to try again (y/n) ? :: ");
+                }
+            }while(yes_or_no!='y'&&yes_or_no!='n');
+
+        }
+        check=1;
+    }
+
+    getch();
+    return 0;
+}
