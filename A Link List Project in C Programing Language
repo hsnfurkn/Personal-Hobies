@@ -1,0 +1,783 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <conio.h>
+
+typedef struct area
+{
+    int id;
+    char title[20];
+    struct book *BookList;
+    struct area *next;
+}Area;
+
+typedef struct book
+{
+    int year,areaNum;
+    char name[35],author[35],category[20];
+    struct book *next;
+}Book;
+
+void printBookList(Book *headPtr);
+void readBookList(Book *headPtr);
+void readAreaList(Area *headPtr);
+void printAreaList(Area *headPtr);
+void addNewArea(Area *headPtr);
+void scanBooksArea(Area *headPtr_1, Book *headPtr_2);
+void alphabeticalSorting (Book *headPtr);
+void searchAuthorBooks(Book *headPtr);
+void searchCategoryBooks(Book *headPtr);
+void addNewBook(Area *headPtr_1, Book *headPtr_2);
+void searchYearBooks(Book *headPtr);
+void detailInformationOfArea(Area *headPtr);
+void removeArea(Area **headPtr);
+void printingModel(Book *print);
+
+int numberOfBooks = 0;
+
+int main()
+{
+    Book *headBook;
+    headBook = malloc(sizeof(Book));
+    headBook->next = NULL;
+
+    Area *headArea;
+    headArea = malloc(sizeof(Area));
+    headArea->next = NULL;
+
+    readBookList(headBook);
+    readAreaList(headArea);
+    scanBooksArea(headArea, headBook);
+
+    int selection;
+
+    while(1)
+    {
+        printf("\n1-Query all books in alphabetical order\n2-Add an area\n3-Add a book to the book list of an area\n");
+        printf("4-Show detailed information about a particular area\n5-Remove an area\n6-Query the books which were written by a particular author\n");
+        printf("7-Query the books according to a particular category\n8-Query the books according to a particular publication year\n0-Exit\n\n");
+        printf("Please select one of the selections:");
+        scanf("%d",&selection);
+        system("CLS");
+
+        if(selection==1)
+        {
+            alphabeticalSorting(headBook);
+            printBookList(headBook);
+        }
+        else if(selection==2)
+        {
+            addNewArea(headArea);
+            printAreaList(headArea);
+        }
+        else if(selection==3)
+        {
+            addNewBook(headArea, headBook);
+        }
+        else if(selection==4)
+        {
+            detailInformationOfArea(headArea);
+        }
+        else if(selection==5)
+        {
+            removeArea(&headArea);
+        }
+        else if(selection==6)
+        {
+            searchAuthorBooks(headBook);
+        }
+        else if(selection==7)
+        {
+            searchCategoryBooks(headBook);
+        }
+        else if(selection==8)
+        {
+            searchYearBooks(headBook);
+        }
+        else if(selection==0)
+        {
+            system("CLS");
+            printf("\n\n\n\n\n\n\n\n\n\n\n\n\t\t\t\tThank you for giving us the opportunity to serve you...\n\n\n\n\n\n\n\n\n\n\n\n");
+            break;
+        }
+        else
+            printf("\nError!!!\tSelection is not available...\n\n");
+    }
+    return 0;
+}
+
+void readBookList(Book *headPtr)
+{
+    FILE *ptrFile = fopen("Books.txt","r");
+
+    Book *scan;
+    scan = headPtr;
+
+    while(!feof(ptrFile))
+    {
+        fscanf(ptrFile,"%s %s %s %d %d",scan->name,scan->author,scan->category,&scan->year,&scan->areaNum);
+        scan->next = malloc(sizeof(Book));
+        scan = scan->next;
+        scan->next = NULL;
+        numberOfBooks++;
+    }
+    fclose(ptrFile);
+}
+
+void printingModel(Book *print)
+{
+    if(print->year != 0)
+    {
+        if(strlen(print->name) < 8)
+        {
+            if(strlen(print->author) < 8)
+            {
+                if(strlen(print->category) < 8)
+                    printf("%s\t\t\t\t%s\t\t\t\t%s\t\t\t%d\t%d\n",print->name,print->author,print->category,print->year,print->areaNum);
+                if(strlen(print->category) >=8 && strlen(print->category) < 16)
+                    printf("%s\t\t\t\t%s\t\t\t\t%s\t\t%d\t%d\n",print->name,print->author,print->category,print->year,print->areaNum);
+                if(strlen(print->category) >=16)
+                    printf("%s\t\t\t\t%s\t\t\t\t%s\t%d\t%d\n",print->name,print->author,print->category,print->year,print->areaNum);
+            }
+            if(strlen(print->author) >= 8 && strlen(print->author) <16)
+            {
+                if(strlen(print->category) < 8)
+                    printf("%s\t\t\t\t%s\t\t\t%s\t\t\t%d\t%d\n",print->name,print->author,print->category,print->year,print->areaNum);
+                if(strlen(print->category) >=8 && strlen(print->category) < 16)
+                    printf("%s\t\t\t\t%s\t\t\t%s\t\t%d\t%d\n",print->name,print->author,print->category,print->year,print->areaNum);
+                if(strlen(print->category) >=16)
+                    printf("%s\t\t\t\t%s\t\t\t%s\t%d\t%d\n",print->name,print->author,print->category,print->year,print->areaNum);
+            }
+            if(strlen(print->author) >= 16 && strlen(print->author) <24)
+            {
+                if(strlen(print->category) < 8)
+                    printf("%s\t\t\t\t%s\t\t%s\t\t\t%d\t%d\n",print->name,print->author,print->category,print->year,print->areaNum);
+                if(strlen(print->category) >=8 && strlen(print->category) < 16)
+                    printf("%s\t\t\t\t%s\t\t%s\t\t%d\t%d\n",print->name,print->author,print->category,print->year,print->areaNum);
+                if(strlen(print->category) >=16)
+                    printf("%s\t\t\t\t%s\t\t%s\t%d\t%d\n",print->name,print->author,print->category,print->year,print->areaNum);
+            }
+            if(strlen(print->author) >= 24)
+            {
+                if(strlen(print->category) < 8)
+                    printf("%s\t\t\t\t%s\t%s\t\t\t%d\t%d\n",print->name,print->author,print->category,print->year,print->areaNum);
+                if(strlen(print->category) >=8 && strlen(print->category) < 16)
+                    printf("%s\t\t\t\t%s\t%s\t\t%d\t%d\n",print->name,print->author,print->category,print->year,print->areaNum);
+                if(strlen(print->category) >=16)
+                    printf("%s\t\t\t\t%s\t%s\t%d\t%d\n",print->name,print->author,print->category,print->year,print->areaNum);
+            }
+        }
+        if(strlen(print->name) >= 8 && strlen(print->name) < 16)
+        {
+            if(strlen(print->author) < 8)
+            {
+                if(strlen(print->category) < 8)
+                    printf("%s\t\t\t%s\t\t\t\t%s\t\t\t%d\t%d\n",print->name,print->author,print->category,print->year,print->areaNum);
+                if(strlen(print->category) >=8 && strlen(print->category) < 16)
+                    printf("%s\t\t\t%s\t\t\t\t%s\t\t%d\t%d\n",print->name,print->author,print->category,print->year,print->areaNum);
+                if(strlen(print->category) >=16)
+                    printf("%s\t\t\t%s\t\t\t\t%s\t%d\t%d\n",print->name,print->author,print->category,print->year,print->areaNum);
+            }
+            if(strlen(print->author) >= 8 && strlen(print->author) <16)
+            {
+                if(strlen(print->category) < 8)
+                    printf("%s\t\t\t%s\t\t\t%s\t\t\t%d\t%d\n",print->name,print->author,print->category,print->year,print->areaNum);
+                if(strlen(print->category) >=8 && strlen(print->category) < 16)
+                    printf("%s\t\t\t%s\t\t\t%s\t\t%d\t%d\n",print->name,print->author,print->category,print->year,print->areaNum);
+                if(strlen(print->category) >=16)
+                    printf("%s\t\t\t%s\t\t\t%s\t%d\t%d\n",print->name,print->author,print->category,print->year,print->areaNum);
+            }
+            if(strlen(print->author) >= 16 && strlen(print->author) <24)
+            {
+                if(strlen(print->category) < 8)
+                    printf("%s\t\t\t%s\t\t%s\t\t\t%d\t%d\n",print->name,print->author,print->category,print->year,print->areaNum);
+                if(strlen(print->category) >=8 && strlen(print->category) < 16)
+                    printf("%s\t\t\t%s\t\t%s\t\t%d\t%d\n",print->name,print->author,print->category,print->year,print->areaNum);
+                if(strlen(print->category) >=16)
+                    printf("%s\t\t\t%s\t\t%s\t%d\t%d\n",print->name,print->author,print->category,print->year,print->areaNum);
+            }
+            if(strlen(print->author) >= 24)
+            {
+                if(strlen(print->category) < 8)
+                    printf("%s\t\t\t%s\t%s\t\t\t%d\t%d\n",print->name,print->author,print->category,print->year,print->areaNum);
+                if(strlen(print->category) >=8 && strlen(print->category) < 16)
+                    printf("%s\t\t\t%s\t%s\t\t%d\t%d\n",print->name,print->author,print->category,print->year,print->areaNum);
+                if(strlen(print->category) >=16)
+                    printf("%s\t\t\t%s\t%s\t%d\t%d\n",print->name,print->author,print->category,print->year,print->areaNum);
+            }
+        }
+        if(strlen(print->name) >= 16 && strlen(print->name) < 24)
+        {
+            if(strlen(print->author) < 8)
+            {
+                if(strlen(print->category) < 8)
+                    printf("%s\t\t%s\t\t\t\t%s\t\t\t%d\t%d\n",print->name,print->author,print->category,print->year,print->areaNum);
+                if(strlen(print->category) >=8 && strlen(print->category) < 16)
+                    printf("%s\t\t%s\t\t\t\t%s\t\t%d\t%d\n",print->name,print->author,print->category,print->year,print->areaNum);
+                if(strlen(print->category) >=16)
+                    printf("%s\t\t%s\t\t\t\t%s\t%d\t%d\n",print->name,print->author,print->category,print->year,print->areaNum);
+            }
+            if(strlen(print->author) >= 8 && strlen(print->author) <16)
+            {
+                if(strlen(print->category) < 8)
+                    printf("%s\t\t%s\t\t\t%s\t\t\t%d\t%d\n",print->name,print->author,print->category,print->year,print->areaNum);
+                if(strlen(print->category) >=8 && strlen(print->category) < 16)
+                    printf("%s\t\t%s\t\t\t%s\t\t%d\t%d\n",print->name,print->author,print->category,print->year,print->areaNum);
+                if(strlen(print->category) >=16)
+                    printf("%s\t\t%s\t\t\t%s\t%d\t%d\n",print->name,print->author,print->category,print->year,print->areaNum);
+            }
+            if(strlen(print->author) >= 16 && strlen(print->author) <24)
+            {
+                if(strlen(print->category) < 8)
+                    printf("%s\t\t%s\t\t%s\t\t\t%d\t%d\n",print->name,print->author,print->category,print->year,print->areaNum);
+                if(strlen(print->category) >=8 && strlen(print->category) < 16)
+                    printf("%s\t\t%s\t\t%s\t\t%d\t%d\n",print->name,print->author,print->category,print->year,print->areaNum);
+                if(strlen(print->category) >=16)
+                    printf("%s\t\t%s\t\t%s\t%d\t%d\n",print->name,print->author,print->category,print->year,print->areaNum);
+            }
+            if(strlen(print->author) >= 24)
+            {
+                if(strlen(print->category) < 8)
+                    printf("%s\t\t%s\t%s\t\t\t%d\t%d\n",print->name,print->author,print->category,print->year,print->areaNum);
+                if(strlen(print->category) >=8 && strlen(print->category) < 16)
+                    printf("%s\t\t%s\t%s\t\t%d\t%d\n",print->name,print->author,print->category,print->year,print->areaNum);
+                if(strlen(print->category) >=16)
+                    printf("%s\t\t%s\t%s\t%d\t%d\n",print->name,print->author,print->category,print->year,print->areaNum);
+            }
+        }
+        if(strlen(print->name) >= 24)
+        {
+            if(strlen(print->author) < 8)
+            {
+                if(strlen(print->category) < 8)
+                    printf("%s\t%s\t\t\t\t%s\t\t\t%d\t%d\n",print->name,print->author,print->category,print->year,print->areaNum);
+                if(strlen(print->category) >=8 && strlen(print->category) < 16)
+                    printf("%s\t%s\t\t\t\t%s\t\t%d\t%d\n",print->name,print->author,print->category,print->year,print->areaNum);
+                if(strlen(print->category) >=16)
+                    printf("%s\t%s\t\t\t\t%s\t%d\t%d\n",print->name,print->author,print->category,print->year,print->areaNum);
+            }
+            if(strlen(print->author) >= 8 && strlen(print->author) <16)
+            {
+                if(strlen(print->category) < 8)
+                    printf("%s\t%s\t\t\t%s\t\t\t%d\t%d\n",print->name,print->author,print->category,print->year,print->areaNum);
+                if(strlen(print->category) >=8 && strlen(print->category) < 16)
+                    printf("%s\t%s\t\t\t%s\t\t%d\t%d\n",print->name,print->author,print->category,print->year,print->areaNum);
+                if(strlen(print->category) >=16)
+                    printf("%s\t%s\t\t\t%s\t%d\t%d\n",print->name,print->author,print->category,print->year,print->areaNum);
+            }
+            if(strlen(print->author) >= 16 && strlen(print->author) < 24)
+            {
+                if(strlen(print->category) < 8)
+                    printf("%s\t%s\t\t%s\t\t\t%d\t%d\n",print->name,print->author,print->category,print->year,print->areaNum);
+                if(strlen(print->category) >=8 && strlen(print->category) < 16)
+                    printf("%s\t%s\t\t%s\t\t%d\t%d\n",print->name,print->author,print->category,print->year,print->areaNum);
+                if(strlen(print->category) >=16)
+                    printf("%s\t%s\t\t%s\t%d\t%d\n",print->name,print->author,print->category,print->year,print->areaNum);
+            }
+            if(strlen(print->author) >= 24)
+            {
+                if(strlen(print->category) < 8)
+                    printf("%s\t%s\t%s\t\t\t%d\t%d\n",print->name,print->author,print->category,print->year,print->areaNum);
+                if(strlen(print->category) >=8 && strlen(print->category) < 16)
+                    printf("%s\t%s\t%s\t\t%d\t%d\n",print->name,print->author,print->category,print->year,print->areaNum);
+                if(strlen(print->category) >=16)
+                    printf("%s\t%s\t%s\t%d\t%d\n",print->name,print->author,print->category,print->year,print->areaNum);
+            }
+        }
+    }
+}
+
+void printBookList(Book *headPtr)
+{
+    Book *print;
+    print = headPtr;
+
+    printf("\n");
+
+    while(print != NULL)
+    {
+        printingModel(print);
+		print = print->next;
+	}
+	printf("\n");
+}
+
+void readAreaList(Area *headPtr)
+{
+    FILE *ptrFile = fopen("Areas.txt","r");
+
+    Area *scan;
+    scan = headPtr;
+
+    while(!feof(ptrFile))
+    {
+        fscanf(ptrFile,"%d %s",&scan->id,scan->title);
+        scan->BookList = malloc(sizeof(Book));
+        scan->BookList->next = NULL;
+        scan->next = malloc(sizeof(Area));
+        scan = scan->next;
+        scan->next = NULL;
+    }
+    fclose(ptrFile);
+}
+
+void printAreaList(Area *headPtr)
+{
+    Area *print;
+    print = headPtr;
+
+    printf("\n");
+    while(print != NULL)
+    {
+        if(print->id < 4000)
+            printf("%d\t%s\n",print->id,print->title);
+		print = print->next;
+	}
+    printf("\n");
+}
+
+void addNewArea(Area *headPtr)
+{
+    Area *add;
+    Area *scan;
+
+    add = headPtr;
+    scan = headPtr;
+    int newid;
+
+    while(add->next != NULL)
+    {
+        add = add->next;
+        if(add->id <4000)
+            newid = (add->id) + 1;
+    }
+
+    add->next = malloc(sizeof(Area));
+    add = add->next;
+    add->next = NULL;
+    add->id = newid;
+    add->BookList = malloc(sizeof(Book));
+    printf("Please enter a new area name (Like Turkish_Literature): ");
+    scanf("%s",add->title);
+
+    do{
+        if(strcmp(scan->title,add->title) == 0)
+        {
+            printf("Please try to enter another name: ");
+            scanf("%s",add->title);
+            scan = headPtr;
+        }
+        else
+            scan = scan->next;
+    }while(scan->next != NULL);
+}
+
+void scanBooksArea(Area *headPtr_1, Book *headPtr_2)
+{
+    Area *scan_1;
+    scan_1 = headPtr_1;
+
+    Book *scan_2;
+    scan_2 = headPtr_2;
+
+    Book *scan_3;
+
+    while(scan_1 != NULL)
+    {
+        scan_3 = scan_1->BookList;
+
+        while(scan_2 != NULL)
+        {
+            if(scan_2->areaNum == scan_1->id)
+            {
+                strcpy(scan_3->author, scan_2->author);
+                strcpy(scan_3->category, scan_2->category);
+                strcpy(scan_3->name, scan_2->name);
+                scan_3->year = scan_2->year;
+                scan_3->areaNum = scan_2->areaNum;
+
+                scan_3->next = malloc(sizeof(Book));
+                scan_3 = scan_3->next;
+                scan_3->next = NULL;
+            }
+            scan_2 = scan_2->next;
+        }
+        scan_2 = headPtr_2;
+        scan_1 = scan_1->next;
+    }
+
+}
+
+void alphabeticalSorting(Book *headPtr)
+{
+    Book *temp;
+    temp = malloc(sizeof(Book));
+    temp->next = NULL;
+
+    Book *scan;
+    scan = headPtr;
+
+    Book *control;
+    control = malloc(sizeof(Book));
+    control->next = NULL;
+
+    int i,bookNum = numberOfBooks-1;
+
+    while(scan != NULL)
+    {
+        control = scan->next;
+
+        for(i=0; i<=bookNum; i++)
+        {
+            if(scan->name[0] > scan->next->name[0] && scan->next->year != 0)
+            {
+                strcpy(temp->name, scan->name);
+                strcpy(temp->author, scan->author);
+                strcpy(temp->category, scan->category);
+                temp->year = scan->year;
+                temp->areaNum = scan->areaNum;
+
+                strcpy(scan->name, scan->next->name);
+                strcpy(scan->author, scan->next->author);
+                strcpy(scan->category, scan->next->category);
+                scan->year = scan->next->year;
+                scan->areaNum = scan->next->areaNum;
+
+                strcpy(scan->next->name, temp->name);
+                strcpy(scan->next->author, temp->author);
+                strcpy(scan->next->category, temp->category);
+                scan->next->year = temp->year;
+                scan->next->areaNum = temp->areaNum;
+            }
+            else if(scan->name[0] == scan->next->name[0] && scan->next->year != 0 )
+                if(scan->name[1] > scan->next->name[1])
+                {
+                    strcpy(temp->name, scan->name);
+                    strcpy(temp->author, scan->author);
+                    strcpy(temp->category, scan->category);
+                    temp->year = scan->year;
+                    temp->areaNum = scan->areaNum;
+
+                    strcpy(scan->name, scan->next->name);
+                    strcpy(scan->author, scan->next->author);
+                    strcpy(scan->category, scan->next->category);
+                    scan->year = scan->next->year;
+                    scan->areaNum = scan->next->areaNum;
+
+                    strcpy(scan->next->name, temp->name);
+                    strcpy(scan->next->author, temp->author);
+                    strcpy(scan->next->category, temp->category);
+                    scan->next->year = temp->year;
+                    scan->next->areaNum = temp->areaNum;
+                }
+            else if(scan->name[0] == scan->next->name[0] && scan->name[1] == scan->next->name[1] && scan->next->year != 0 )
+                if(scan->name[2] > scan->next->name[2])
+                {
+                    strcpy(temp->name, scan->name);
+                    strcpy(temp->author, scan->author);
+                    strcpy(temp->category, scan->category);
+                    temp->year = scan->year;
+                    temp->areaNum = scan->areaNum;
+
+                    strcpy(scan->name, scan->next->name);
+                    strcpy(scan->author, scan->next->author);
+                    strcpy(scan->category, scan->next->category);
+                    scan->year = scan->next->year;
+                    scan->areaNum = scan->next->areaNum;
+
+                    strcpy(scan->next->name, temp->name);
+                    strcpy(scan->next->author, temp->author);
+                    strcpy(scan->next->category, temp->category);
+                    scan->next->year = temp->year;
+                    scan->next->areaNum = temp->areaNum;
+                }
+            else if(scan->name[0] == scan->next->name[0] && scan->name[1] == scan->next->name[1] && scan->name[2] == scan->next->name[2] && scan->next->year != 0 )
+                if(scan->name[3] > scan->next->name[3])
+                {
+                    strcpy(temp->name, scan->name);
+                    strcpy(temp->author, scan->author);
+                    strcpy(temp->category, scan->category);
+                    temp->year = scan->year;
+                    temp->areaNum = scan->areaNum;
+
+                    strcpy(scan->name, scan->next->name);
+                    strcpy(scan->author, scan->next->author);
+                    strcpy(scan->category, scan->next->category);
+                    scan->year = scan->next->year;
+                    scan->areaNum = scan->next->areaNum;
+
+                    strcpy(scan->next->name, temp->name);
+                    strcpy(scan->next->author, temp->author);
+                    strcpy(scan->next->category, temp->category);
+                    scan->next->year = temp->year;
+                    scan->next->areaNum = temp->areaNum;
+                }
+            else if(scan->name[0] == scan->next->name[0] && scan->name[1] == scan->next->name[1] && scan->name[2] == scan->next->name[2] && scan->name[3] == scan->next->name[3] && scan->next->year != 0 )
+                if(scan->name[4] > scan->next->name[4])
+                {
+                    strcpy(temp->name, scan->name);
+                    strcpy(temp->author, scan->author);
+                    strcpy(temp->category, scan->category);
+                    temp->year = scan->year;
+                    temp->areaNum = scan->areaNum;
+
+                    strcpy(scan->name, scan->next->name);
+                    strcpy(scan->author, scan->next->author);
+                    strcpy(scan->category, scan->next->category);
+                    scan->year = scan->next->year;
+                    scan->areaNum = scan->next->areaNum;
+
+                    strcpy(scan->next->name, temp->name);
+                    strcpy(scan->next->author, temp->author);
+                    strcpy(scan->next->category, temp->category);
+                    scan->next->year = temp->year;
+                    scan->next->areaNum = temp->areaNum;
+                }
+            else if(scan->name[0] == scan->next->name[0] && scan->name[1] == scan->next->name[1] && scan->name[2] == scan->next->name[2] && scan->name[3] == scan->next->name[3] && scan->name[4] == scan->next->name[4] && scan->next->year != 0 )
+                if(scan->name[5] > scan->next->name[5])
+                {
+                    strcpy(temp->name, scan->name);
+                    strcpy(temp->author, scan->author);
+                    strcpy(temp->category, scan->category);
+                    temp->year = scan->year;
+                    temp->areaNum = scan->areaNum;
+
+                    strcpy(scan->name, scan->next->name);
+                    strcpy(scan->author, scan->next->author);
+                    strcpy(scan->category, scan->next->category);
+                    scan->year = scan->next->year;
+                    scan->areaNum = scan->next->areaNum;
+
+                    strcpy(scan->next->name, temp->name);
+                    strcpy(scan->next->author, temp->author);
+                    strcpy(scan->next->category, temp->category);
+                    scan->next->year = temp->year;
+                    scan->next->areaNum = temp->areaNum;
+                }
+            scan->next = scan->next->next;
+        }
+        bookNum = bookNum-1;
+        scan->next = control;
+        scan = scan->next;
+    }
+}
+
+void searchAuthorBooks(Book *headPtr)
+{
+    Book *scan;
+    scan = headPtr;
+    char author_1[35];
+    int indicator = 0;
+
+    printf("\nPlease enter a author name (Please use '_' instead of ' '(space)): ");
+    scanf("%s",author_1);
+    printf("\n");
+
+    while(scan != NULL)
+    {
+        if(strcmp(scan->author, author_1) == 0)
+        {
+            printingModel(scan);
+            indicator = 1;
+        }
+        scan = scan->next;
+    }
+    if(indicator == 0)
+        printf("There is not a book which has this specification!!\n");
+}
+
+void searchCategoryBooks(Book *headPtr)
+{
+    Book *scan;
+    scan = headPtr;
+    char category_1[20];
+    int indicator = 0;
+
+    printf("\nPlease enter a category (Please use '_' instead of ' '(space)): ");
+    scanf("%s",category_1);
+    printf("\n");
+
+    while(scan != NULL)
+    {
+        if(strcmp(scan->category, category_1) == 0)
+        {
+            printingModel(scan);
+            indicator = 1;
+        }
+        scan = scan->next;
+    }
+    if(indicator == 0)
+        printf("There is not a book which has this specification!!\n");
+}
+
+void addNewBook(Area *headPtr_1, Book *headPtr_2)
+{
+    Area *place;
+    place = headPtr_1;
+
+    Book *addBook;
+    addBook = headPtr_2;
+
+    Book *booklist;
+
+    int areaNum;
+
+    printf("Please enter your area ID: ");
+    scanf("%d",&areaNum);
+
+    while(place->id != areaNum)
+    {
+        if(place->next == NULL)
+        {
+            printf("\nThere is not an area in this ID!!\n");
+            break;
+        }
+        place = place->next;
+    }
+
+    booklist = place->BookList;
+    if(place->id == areaNum)
+    {
+        char bookName[35];
+        printf("\nPlease enter properties of the book: ");
+        printf("\nBook's Name (Please use '_' instead of ' '(space)): ");
+        scanf("%s",bookName);
+
+        do
+        {
+            if(strcmp(addBook->name, bookName) == 0)
+            {
+                printf("Please try to enter another name: ");
+                scanf("%s",bookName);
+                addBook = headPtr_2;
+            }
+            else
+                addBook = addBook->next;
+        }while(addBook->next != NULL);
+
+
+        while(booklist->next != NULL)
+            booklist = booklist->next;
+
+        booklist->next = malloc(sizeof(Book));
+        booklist = booklist->next;
+        booklist->next = NULL;
+
+        booklist->areaNum = place->id;
+
+        strcpy(booklist->name, bookName);
+        printf("Author's Name (Please use '_' instead of ' '(space)): ");
+        scanf("%s",booklist->author);
+        printf("Publication Year (Please just enter a number): ");
+        scanf("%d",&booklist->year);
+        printf("Category (Please use '_' instead of ' '(space)): ");
+        scanf("%s",booklist->category);
+
+        addBook->next = malloc(sizeof(Book));
+        addBook = addBook->next;
+        addBook->next = NULL;
+
+        strcpy(addBook->author, booklist->author);
+        strcpy(addBook->category, booklist->category);
+        strcpy(addBook->name, booklist->name);
+        addBook->year = booklist->year;
+        addBook->areaNum = booklist->areaNum;
+        numberOfBooks++;
+    }
+
+}
+
+void searchYearBooks(Book *headPtr)
+{
+    Book *scan;
+    scan = headPtr;
+    int year, indicator =0;
+
+    printf("\nPlease enter a year (Please just enter a number!!): ");
+    scanf("%d",&year);
+    printf("\n");
+
+    while(scan != NULL)
+    {
+        if(scan->year == year)
+        {
+            indicator = 1;
+            printingModel(scan);
+        }
+        scan = scan->next;
+    }
+    if(indicator == 0)
+        printf("There is not a book which has this specification!!\n");
+}
+
+void detailInformationOfArea(Area *headPtr)
+{
+    Area *scan;
+    scan = headPtr;
+
+    Book *scan_2;
+
+    int areaNum, indicator = 0;
+
+    printf("Please enter an area ID: ");
+    scanf("%d",&areaNum);
+    printf("\n");
+
+    while(scan != NULL)
+    {
+        scan_2 = scan->BookList;
+
+        if(scan->id == areaNum)
+        {
+            printf("Id: %d\t\tName: %s\n\n",scan->id,scan->title);
+            printf("Books:\n");
+            while(scan_2 != NULL)
+            {
+                printingModel(scan_2);
+                scan_2 = scan_2->next;
+            }
+            indicator = 1;
+        }
+        scan = scan->next;
+    }
+    if(indicator == 0)
+        printf("There is not an area which has this ID!!\n");
+}
+void removeArea(Area **headPtr)
+{
+    Area *tempArea = NULL;
+    Area *previousArea, *currentArea;
+    int idArea;
+
+    printf("Please enter a area ID: ");
+    scanf("%d",&idArea);
+
+    if( idArea == (*headPtr)->id)
+    {
+    	tempArea = (*headPtr);
+    	(*headPtr) = (*headPtr)->next;
+    	free(tempArea->BookList);
+    	free(tempArea);
+	}
+
+	else
+    {
+        previousArea = *headPtr;
+		currentArea = (*headPtr)->next;
+
+		while(currentArea != NULL && currentArea->id != idArea)
+        {
+			previousArea = currentArea;
+			currentArea = currentArea->next;
+		}
+        if(currentArea != NULL)
+        {
+            tempArea = currentArea;
+            previousArea->next = currentArea->next;
+            free(tempArea->BookList);
+            free(tempArea);
+        }
+        else
+            printf("\nThere is not an area which has this ID!!\n");
+    }
+}
